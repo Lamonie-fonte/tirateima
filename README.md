@@ -5,8 +5,9 @@ Aplicação independente para conferir uma estimativa de contas de água e esgot
 ## O que está incluído
 
 - busca de endereço por CEP, com confirmação do número do imóvel;
+- cálculo do consumo pela diferença entre a leitura atual do hidrômetro e o campo “Leitura atual” da última conta;
 - cálculo progressivo por categoria e faixa de consumo;
-- detalhamento separado de água e esgoto;
+- detalhamento separado de água e esgoto, com esgoto sobre 80% do volume de água;
 - comparação opcional com o valor informado da fatura;
 - envio do resultado por e-mail através de Google Apps Script;
 - banco Supabase com RLS, tarifas versionadas e função pública de cálculo;
@@ -17,6 +18,8 @@ Aplicação independente para conferir uma estimativa de contas de água e esgot
 Os valores cadastrados são os da [estrutura tarifária oficial da Cagece](https://www.cagece.com.br/produtos-e-servicos/precos-e-prazos/estrutura-tarifaria/), válida desde 5 de novembro de 2025.
 
 O resultado é uma estimativa informativa. Multas, juros, parcelamentos, serviços, créditos, regras específicas e dados de leitura podem alterar o total oficial da fatura.
+
+Para calcular pelo hidrômetro, informe apenas a numeração preta. A estimativa mostra o valor acumulado até a leitura digitada e não projeta o consumo que ainda poderá ocorrer antes da leitura oficial.
 
 ## Variáveis de ambiente
 

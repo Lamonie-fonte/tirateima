@@ -11,6 +11,8 @@ export const CATEGORY_OPTIONS = [
 
 export type TariffCategory = (typeof CATEGORY_OPTIONS)[number]["value"];
 
+export type ConsumptionInputMode = "meter" | "volume";
+
 export type Address = {
   cep: string;
   street: string;
@@ -50,6 +52,9 @@ export type CalculationRequest = {
   number: string;
   complement?: string;
   category: TariffCategory;
+  inputMode: ConsumptionInputMode;
+  previousReadingM3: number | null;
+  currentReadingM3: number | null;
   consumptionM3: number;
   billAmount: number | null;
   hasSewer: boolean;

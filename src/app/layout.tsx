@@ -10,14 +10,14 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "https://tirateima.vercel.app",
+    process.env.NEXT_PUBLIC_SITE_URL || "https://tirateima-two.vercel.app",
   ),
   title: {
     default: "Tira-Teima Cagece — Confira sua conta de água",
     template: "%s | Tira-Teima Cagece",
   },
   description:
-    "Confira uma estimativa da sua conta de água e esgoto usando a tabela tarifária oficial da Cagece.",
+    "Digite as leituras do hidrômetro, descubra o consumo em m³ e estime água e esgoto pela tabela oficial da Cagece.",
   applicationName: "Tira-Teima Cagece",
   keywords: [
     "Cagece",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: "Tira-Teima Cagece",
-    description: "Entenda se o valor da sua conta está próximo da tarifa oficial.",
+    description: "Calcule o consumo pela leitura do hidrômetro e estime o valor pela tarifa oficial.",
     locale: "pt_BR",
     type: "website",
   },

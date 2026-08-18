@@ -6,6 +6,7 @@ import {
   CATEGORY_OPTIONS,
   type Address,
   type CalculationRequest,
+  type ConsumptionInputMode,
   type Estimate,
   type TariffCategory,
 } from "@/lib/types";
@@ -19,7 +20,10 @@ type FormState = {
   cep: string;
   number: string;
   complement: string;
-  category: TariffCategory;
+  category: TariffCategory | "";
+  inputMode: ConsumptionInputMode;
+  previousReading: string;
+  currentReading: string;
   consumption: string;
   billAmount: string;
   hasSewer: boolean;
@@ -29,11 +33,26 @@ const INITIAL_FORM: FormState = {
   cep: "",
   number: "",
   complement: "",
-  category: "residencial_normal",
+  category: "",
+  inputMode: "meter",
+  previousReading: "",
+  currentReading: "",
   consumption: "",
   billAmount: "",
   hasSewer: true,
 };
+
+function parseMeterReading(value: string) {
+  const trimmed = value.trim();
+  if (!/^\d+$/.test(trimmed)) return null;
+  const reading = Number(trimmed);
+  return Number.isSafeInteger(reading) ? reading : null;
+}
+
+function formatIsoDate(value: string) {
+  const [year, month, day] = value.split("-");
+  return year && month && day ? `${day}/${month}/${year}` : value;
+}
 
 async function readJson<T>(response: Response): Promise<T> {
   const data = (await response.json()) as T & { error?: string };
@@ -53,6 +72,14 @@ export function Calculator() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [emailStatus, setEmailStatus] = useState("");
+
+  const previousReading = parseMeterReading(form.previousReading);
+  const currentReading = parseMeterReading(form.currentReading);
+  const meterConsumption = previousReading !== null
+    && currentReading !== null
+    && currentReading >= previousReading
+    ? currentReading - previousReading
+    : null;
 
   function updateForm<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -92,8 +119,32 @@ export function Calculator() {
   }
 
   function makeCalculationPayload(): CalculationRequest {
-    const consumptionM3 = parseBrazilianNumber(form.consumption);
-    const billAmount = form.billAmount.trim()
+    if (!form.category) {
+      throw new Error("Selecione a tarifa da ligação antes de calcular.");
+    }
+
+    let consumptionM3 = parseBrazilianNumber(form.consumption);
+    let previousReadingM3: number | null = null;
+    let currentReadingM3: number | null = null;
+
+    if (form.inputMode === "meter") {
+      previousReadingM3 = parseMeterReading(form.previousReading);
+      currentReadingM3 = parseMeterReading(form.currentReading);
+
+      if (previousReadingM3 === null || currentReadingM3 === null) {
+        throw new Error("Digite somente os números pretos das duas leituras.");
+      }
+
+      if (currentReadingM3 < previousReadingM3) {
+        throw new Error(
+          "A leitura atual não pode ser menor que a anterior. Se o hidrômetro foi trocado, confirme a leitura com a Cagece.",
+        );
+      }
+
+      consumptionM3 = currentReadingM3 - previousReadingM3;
+    }
+
+    const billAmount = form.inputMode === "volume" && form.billAmount.trim()
       ? parseBrazilianNumber(form.billAmount)
       : null;
 
@@ -110,6 +161,9 @@ export function Calculator() {
       number: form.number.trim(),
       complement: form.complement.trim() || undefined,
       category: form.category,
+      inputMode: form.inputMode,
+      previousReadingM3,
+      currentReadingM3,
       consumptionM3,
       billAmount,
       hasSewer: form.hasSewer,
@@ -285,48 +339,138 @@ export function Calculator() {
           </div>
 
           <div className="form-stack">
-            <label htmlFor="category">Categoria da ligação</label>
+            <fieldset className="input-mode-fieldset">
+              <legend>Como você quer informar o consumo?</legend>
+              <div className="input-mode-options">
+                <label className={form.inputMode === "meter" ? "active" : ""}>
+                  <input
+                    type="radio"
+                    name="input-mode"
+                    value="meter"
+                    checked={form.inputMode === "meter"}
+                    onChange={() => updateForm("inputMode", "meter")}
+                  />
+                  <strong>Pelo hidrômetro</strong>
+                  <small>Última conta e leitura de hoje</small>
+                </label>
+                <label className={form.inputMode === "volume" ? "active" : ""}>
+                  <input
+                    type="radio"
+                    name="input-mode"
+                    value="volume"
+                    checked={form.inputMode === "volume"}
+                    onChange={() => updateForm("inputMode", "volume")}
+                  />
+                  <strong>Já sei os m³</strong>
+                  <small>Usar o consumo da conta</small>
+                </label>
+              </div>
+            </fieldset>
+
+            {form.inputMode === "meter" ? (
+              <>
+                <div className="meter-guide" role="note">
+                  <span aria-hidden="true">◉</span>
+                  <p>
+                    <strong>Digite somente os números pretos do hidrômetro.</strong>
+                    <small>
+                      Ignore números vermelhos e ponteiros. Use o campo “Leitura atual” da última conta como base.
+                    </small>
+                  </p>
+                </div>
+                <div className="field-grid">
+                  <div>
+                    <label htmlFor="previous-reading">Leitura da última conta</label>
+                    <input
+                      id="previous-reading"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      placeholder="Ex.: 514"
+                      value={form.previousReading}
+                      onChange={(event) => updateForm(
+                        "previousReading",
+                        event.target.value.replace(/\D/g, "").slice(0, 9),
+                      )}
+                      required
+                    />
+                    <small className="field-help">Copie o campo “Leitura atual” em Dados do consumo</small>
+                  </div>
+                  <div>
+                    <label htmlFor="current-reading">Leitura atual</label>
+                    <input
+                      id="current-reading"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      placeholder="Ex.: 530"
+                      value={form.currentReading}
+                      onChange={(event) => updateForm(
+                        "currentReading",
+                        event.target.value.replace(/\D/g, "").slice(0, 9),
+                      )}
+                      required
+                    />
+                    <small className="field-help">Numeração preta que aparece hoje no hidrômetro</small>
+                  </div>
+                </div>
+
+                {meterConsumption !== null ? (
+                  <div className="consumption-preview" aria-live="polite">
+                    <span>Consumo até agora</span>
+                    <strong>{formatDecimal(meterConsumption)} m³</strong>
+                    <small>{currentReading} − {previousReading} = {meterConsumption}</small>
+                  </div>
+                ) : null}
+              </>
+            ) : (
+              <div className="field-grid">
+                <div>
+                  <label htmlFor="consumption">Consumo faturado</label>
+                  <div className="input-suffix">
+                    <input
+                      id="consumption"
+                      inputMode="decimal"
+                      placeholder="Ex.: 16"
+                      value={form.consumption}
+                      onChange={(event) => updateForm("consumption", event.target.value.slice(0, 12))}
+                      required
+                    />
+                    <span>m³</span>
+                  </div>
+                </div>
+                <div>
+                  <label htmlFor="bill-amount">Valor cobrado</label>
+                  <div className="input-prefix">
+                    <span>R$</span>
+                    <input
+                      id="bill-amount"
+                      inputMode="decimal"
+                      placeholder="Opcional"
+                      value={form.billAmount}
+                      onChange={(event) => updateForm("billAmount", event.target.value.slice(0, 14))}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <label htmlFor="category">Tarifa da ligação</label>
             <select
               id="category"
               value={form.category}
               onChange={(event) => updateForm("category", event.target.value as TariffCategory)}
+              required
             >
+              <option value="" disabled>Selecione a tarifa cadastrada</option>
               {CATEGORY_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
               ))}
             </select>
-
-            <div className="field-grid">
-              <div>
-                <label htmlFor="consumption">Consumo faturado</label>
-                <div className="input-suffix">
-                  <input
-                    id="consumption"
-                    inputMode="decimal"
-                    placeholder="Ex.: 15"
-                    value={form.consumption}
-                    onChange={(event) => updateForm("consumption", event.target.value.slice(0, 12))}
-                    required
-                  />
-                  <span>m³</span>
-                </div>
-              </div>
-              <div>
-                <label htmlFor="bill-amount">Valor cobrado</label>
-                <div className="input-prefix">
-                  <span>R$</span>
-                  <input
-                    id="bill-amount"
-                    inputMode="decimal"
-                    placeholder="Opcional"
-                    value={form.billAmount}
-                    onChange={(event) => updateForm("billAmount", event.target.value.slice(0, 14))}
-                  />
-                </div>
-              </div>
-            </div>
+            <small className="category-help">
+              Importante: Popular e Normal usam valores diferentes. Se a fatura mostrar apenas
+              “Residencial”, confirme a tarifa no cadastro da Cagece — o sistema não adivinha esse dado.
+            </small>
 
             <label className="switch-row" htmlFor="has-sewer">
               <span>
@@ -371,16 +515,34 @@ export function Calculator() {
           <div className="result-total">
             <span>Total estimado</span>
             <strong>{formatCurrency(result.estimate.estimatedTotal)}</strong>
-            <small>{formatDecimal(result.estimate.consumptionM3)} m³ analisados</small>
+            <small>
+              {formatDecimal(result.estimate.consumptionM3)} m³ consumidos
+              {form.inputMode === "meter" ? " até esta leitura" : " analisados"}
+            </small>
           </div>
+
+          {form.inputMode === "meter"
+            && result.estimate.consumptionM3 === meterConsumption
+            && previousReading !== null
+            && currentReading !== null ? (
+              <div className="reading-proof">
+                <span>Como chegamos ao consumo</span>
+                <strong>
+                  Leitura de hoje {currentReading} − última conta {previousReading}
+                  = {formatDecimal(result.estimate.consumptionM3)} m³
+                </strong>
+              </div>
+            ) : null}
 
           <div className="result-breakdown">
             <div>
-              <span>Água</span>
+              <span>Água · {formatDecimal(result.estimate.waterBilledM3)} m³ faturados</span>
               <strong>{formatCurrency(result.estimate.waterAmount)}</strong>
             </div>
             <div>
-              <span>Esgoto</span>
+              <span>
+                Esgoto · {formatDecimal(result.estimate.sewerBilledM3)} m³ faturados
+              </span>
               <strong>{formatCurrency(result.estimate.sewerAmount)}</strong>
             </div>
             {result.estimate.billAmount !== null ? (
@@ -393,8 +555,32 @@ export function Calculator() {
 
           {result.estimate.differenceAmount !== null ? (
             <p className={`difference-note ${result.estimate.comparison}`}>
-              Diferença: <strong>{formatCurrency(Math.abs(result.estimate.differenceAmount))}</strong>
-              {result.estimate.differenceAmount > 0 ? " acima" : " abaixo"} da estimativa.
+              {Math.abs(result.estimate.differenceAmount) < 0.01 ? (
+                <>Sem diferença entre o valor informado e a estimativa.</>
+              ) : (
+                <>
+                  Diferença: <strong>{formatCurrency(Math.abs(result.estimate.differenceAmount))}</strong>
+                  {result.estimate.differenceAmount > 0 ? " acima" : " abaixo"} da estimativa.
+                </>
+              )}
+            </p>
+          ) : null}
+
+          <div className="tariff-summary">
+            <div>
+              <span>Tarifa aplicada</span>
+              <strong>{result.estimate.tariffName}</strong>
+              <small>Vigente desde {formatIsoDate(result.estimate.validFrom)}</small>
+            </div>
+            <a href={result.estimate.sourceUrl} target="_blank" rel="noreferrer">
+              Ver fonte oficial ↗
+            </a>
+          </div>
+
+          {form.hasSewer ? (
+            <p className="sewer-rule-note">
+              O volume de esgoto foi calculado em 80% do volume faturado de água,
+              desprezando a parte decimal, conforme a regra publicada pela Cagece.
             </p>
           ) : null}
 
@@ -407,8 +593,11 @@ export function Calculator() {
           </div>
 
           <p className="result-disclaimer">
-            Estimativa informativa. Outros serviços, multas, juros, créditos e
-            regras específicas da fatura podem alterar o valor final.
+            {form.inputMode === "meter"
+              ? "Este é o valor acumulado até a leitura digitada, não uma previsão do fechamento. "
+              : "Estimativa informativa. "}
+            O hidrômetro pode continuar avançando até a leitura oficial. Outros serviços,
+            multas, juros, créditos e regras específicas da fatura podem alterar o valor final.
           </p>
 
           <form className="email-box" onSubmit={sendEmail}>

@@ -75,16 +75,25 @@ export async function POST(request: Request) {
     const fullAddress = `${address.street}, ${addressNumber} · ${address.neighborhood}, ${address.city}/${address.state}`;
     const differenceText = estimate.differenceAmount === null
       ? "Não informado"
-      : `${formatCurrency(Math.abs(estimate.differenceAmount))} ${estimate.differenceAmount > 0 ? "acima" : "abaixo"}`;
+      : Math.abs(estimate.differenceAmount) < 0.01
+        ? "Sem diferença"
+        : `${formatCurrency(Math.abs(estimate.differenceAmount))} ${estimate.differenceAmount > 0 ? "acima" : "abaixo"}`;
+    const readingText = valid.inputMode === "meter"
+      && valid.previousReadingM3 !== null
+      && valid.currentReadingM3 !== null
+      ? `${valid.currentReadingM3} − ${valid.previousReadingM3} = ${formatDecimal(estimate.consumptionM3)} m³`
+      : "Consumo informado diretamente";
 
     const textBody = [
       `Olá, ${name}!`,
       "",
       "Este é o resultado do seu Tira-Teima Cagece:",
       `Imóvel: ${fullAddress}`,
+      `Tarifa aplicada: ${estimate.tariffName}`,
+      `Leitura: ${readingText}`,
       `Consumo: ${formatDecimal(estimate.consumptionM3)} m³`,
-      `Água: ${formatCurrency(estimate.waterAmount)}`,
-      `Esgoto: ${formatCurrency(estimate.sewerAmount)}`,
+      `Água (${formatDecimal(estimate.waterBilledM3)} m³ faturados): ${formatCurrency(estimate.waterAmount)}`,
+      `Esgoto (${formatDecimal(estimate.sewerBilledM3)} m³ faturados): ${formatCurrency(estimate.sewerAmount)}`,
       `Total estimado: ${formatCurrency(estimate.estimatedTotal)}`,
       `Diferença: ${differenceText}`,
       "",
@@ -106,14 +115,18 @@ export async function POST(request: Request) {
               <div style="font-size:12px;color:#6b8091">Imóvel conferido</div>
               <strong style="font-size:14px">${escapeHtml(fullAddress)}</strong>
             </div>
+            <div style="margin-top:12px;padding:12px 16px;background:#f7fbfe;border:1px solid #dce8ef;border-radius:8px">
+              <div style="font-size:11px;color:#6b8091">Tarifa aplicada: <strong>${escapeHtml(estimate.tariffName)}</strong></div>
+              <div style="margin-top:4px;font-size:11px;color:#42637b">Leitura: <strong>${escapeHtml(readingText)}</strong></div>
+            </div>
             <div style="margin:20px 0;padding:22px;text-align:center;background:#eaf7ff;border-radius:14px">
               <div style="font-size:12px;color:#60798c">Total estimado</div>
               <div style="margin:5px 0;color:#075da8;font-size:34px;font-weight:800">${formatCurrency(estimate.estimatedTotal)}</div>
               <div style="font-size:11px;color:#6b8192">${formatDecimal(estimate.consumptionM3)} m³ analisados</div>
             </div>
             <table style="width:100%;border-collapse:collapse;font-size:13px">
-              <tr><td style="padding:10px;border-bottom:1px solid #e3ebf0">Água</td><td style="padding:10px;border-bottom:1px solid #e3ebf0;text-align:right;font-weight:700">${formatCurrency(estimate.waterAmount)}</td></tr>
-              <tr><td style="padding:10px;border-bottom:1px solid #e3ebf0">Esgoto</td><td style="padding:10px;border-bottom:1px solid #e3ebf0;text-align:right;font-weight:700">${formatCurrency(estimate.sewerAmount)}</td></tr>
+              <tr><td style="padding:10px;border-bottom:1px solid #e3ebf0">Água · ${formatDecimal(estimate.waterBilledM3)} m³</td><td style="padding:10px;border-bottom:1px solid #e3ebf0;text-align:right;font-weight:700">${formatCurrency(estimate.waterAmount)}</td></tr>
+              <tr><td style="padding:10px;border-bottom:1px solid #e3ebf0">Esgoto · ${formatDecimal(estimate.sewerBilledM3)} m³</td><td style="padding:10px;border-bottom:1px solid #e3ebf0;text-align:right;font-weight:700">${formatCurrency(estimate.sewerAmount)}</td></tr>
               <tr><td style="padding:10px">Diferença</td><td style="padding:10px;text-align:right;font-weight:700">${differenceText}</td></tr>
             </table>
             <p style="margin:22px 0 0;color:#778b99;font-size:11px;line-height:1.6">Estimativa informativa. Multas, juros, parcelamentos, serviços, créditos e dados específicos da fatura podem alterar o total final. Este serviço é independente e não pertence à Cagece.</p>

@@ -35,8 +35,9 @@ export default function Home() {
                 <span> faz sentido?</span>
               </h1>
               <p className="hero-lead">
-                Informe o CEP, confirme seu endereço e compare o valor da sua
-                fatura com uma estimativa baseada na tabela oficial da Cagece.
+                Digite a leitura da última conta e a numeração preta que aparece hoje
+                no hidrômetro. O sistema calcula o consumo e estima o valor pela
+                tabela oficial da Cagece.
               </p>
               <div className="hero-points" aria-label="Vantagens">
                 <div>
@@ -49,8 +50,8 @@ export default function Home() {
                 <div>
                   <span className="point-icon">✓</span>
                   <p>
-                    <strong>Cálculo por faixa</strong>
-                    <small>Água e esgoto detalhados separadamente</small>
+                    <strong>Leitura do hidrômetro</strong>
+                    <small>Descubra os m³ sem esperar a próxima conta</small>
                   </p>
                 </div>
                 <div>
@@ -106,16 +107,16 @@ export default function Home() {
                 <span className="how-number">02</span>
                 <h3>Informe a fatura</h3>
                 <p>
-                  Selecione a categoria, o consumo em m³, a existência de esgoto
-                  e, se quiser, o valor cobrado.
+                  Copie o campo “Leitura atual” da última conta e digite somente os
+                  números pretos que aparecem hoje no hidrômetro.
                 </p>
               </article>
               <article className="how-card">
                 <span className="how-number">03</span>
                 <h3>Veja o tira-teima</h3>
                 <p>
-                  Receba a estimativa de água, esgoto e a diferença em relação ao
-                  valor informado.
+                  Veja o consumo acumulado, o valor da água, o volume de esgoto
+                  faturado e o total estimado até a leitura informada.
                 </p>
               </article>
             </div>
@@ -137,18 +138,43 @@ export default function Home() {
             </div>
             <div className="faq-list">
               <details open>
-                <summary>A tarifa muda conforme o bairro?</summary>
+                <summary>Quais números devo copiar do hidrômetro?</summary>
                 <p>
-                  A tabela vigente é aplicada de forma linear nos municípios
-                  operados pela Cagece. Mesmo assim, guardamos CEP e bairro para
-                  identificar a localidade e permitir futuras regras específicas.
+                  Digite somente a numeração preta. Os números vermelhos e os
+                  ponteiros representam frações do metro cúbico e não entram na
+                  leitura informada à Cagece.
+                </p>
+              </details>
+              <details>
+                <summary>Como o consumo é calculado?</summary>
+                <p>
+                  O consumo acumulado é a leitura de hoje menos o campo “Leitura atual”
+                  da última conta. Para conferir uma conta já emitida, 530 − 514 =
+                  16 m³. O valor é calculado pelas faixas da tarifa escolhida.
+                </p>
+              </details>
+              <details>
+                <summary>Por que preciso escolher a tarifa?</summary>
+                <p>
+                  Residencial Social, Popular e Normal têm preços diferentes.
+                  O sistema exige essa informação para não adivinhar. Se a conta
+                  mostrar apenas “Residencial”, confirme o cadastro com a Cagece.
+                </p>
+              </details>
+              <details>
+                <summary>Como o esgoto entra no cálculo?</summary>
+                <p>
+                  Quando há cobrança de esgoto, a Cagece fatura 80% do volume de
+                  água, desprezando a parte decimal, e aplica as faixas próprias
+                  da tarifa de esgoto.
                 </p>
               </details>
               <details>
                 <summary>Por que o valor pode ficar diferente?</summary>
                 <p>
-                  Multas, juros, parcelamentos, serviços, créditos, arredondamentos
-                  ou dados de leitura podem alterar o total final da fatura.
+                  A leitura digitada mostra o acumulado até aquele momento. O
+                  hidrômetro pode avançar até a leitura oficial; multas, juros,
+                  serviços, créditos ou troca de medidor também alteram a fatura.
                 </p>
               </details>
               <details>

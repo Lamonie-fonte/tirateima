@@ -51,6 +51,6 @@ export type CalculationRequest = {
   complement?: string;
   category: TariffCategory;
   consumptionM3: number;
-  billAmount?: number | null;
+  billAmount: number | null;
   hasSewer: boolean;
 };

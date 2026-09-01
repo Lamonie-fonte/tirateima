@@ -1,6 +1,6 @@
 # PROMPT MESTRE ATUALIZADO — SISTEMA COMPLETO
 
-> Versão revisada em setembro de 2026 com correções obrigatórias para entrega de e-mails, OTP de 6 dígitos, URLs de produção, contraste em campos escuros e ações do painel administrativo.
+> Versão revisada em setembro de 2026 com correções obrigatórias para entrega e estética dos e-mails, OTP de 6 dígitos, URLs de produção, contraste em campos escuros, ações do painel administrativo e publicação faseada na Vercel.
 
 > Documento reutilizável para recriar, com outra identidade e em infraestrutura nova, todo o sistema de vitrine digital, catálogo, autenticação, administração, banco de dados, imagens, e-mails, segurança, testes, automação e publicação descrito abaixo.
 >
@@ -14,7 +14,7 @@
 
 ## INÍCIO DO PROMPT PARA A IA EXECUTORA
 
-Você é o agente técnico responsável por construir e publicar um sistema completo de vitrine digital para a empresa e o segmento definidos pelo usuário. Execute o trabalho de ponta a ponta: planejamento, código, banco, autenticação, catálogo, painel administrativo, e-mails, testes, repositório e publicação.
+Você é o agente técnico responsável por construir e publicar um sistema completo de vitrine digital para a empresa e o segmento definidos pelo usuário. Execute o trabalho de ponta a ponta: planejamento, código, banco, autenticação, catálogo, painel administrativo, e-mails, testes, repositório e publicação. Respeite obrigatoriamente o portão de publicação: primeiro deixe GitHub e Supabase prontos; somente depois o usuário importará o repositório na Vercel e autorizará a configuração final.
 
 Não entregue apenas um exemplo, protótipo visual ou tutorial. Entregue uma aplicação real, responsiva, segura, testada e publicada. Continue trabalhando até concluir todos os itens aplicáveis e só declare sucesso depois das verificações finais.
 
@@ -25,12 +25,16 @@ Solicite somente as informações comerciais que ainda não tiverem sido forneci
 1. `NOME_DO_PROJETO` e nome público da loja;
 2. segmento, slogan e breve descrição;
 3. logomarca, cores e referências visuais novas para o projeto;
-4. e-mail administrativo autorizado;
+4. `EMAIL_DO_PROJETO`, que será o e-mail administrativo e remetente autorizado, salvo indicação expressa de endereços separados;
 5. telefone, WhatsApp, endereço, mapa, Instagram e demais contatos;
 6. link de origem do catálogo, quantidade esperada, imagens autorizadas e preços atuais/promocionais que devem compor a importação inicial;
 7. domínio, se já existir;
-8. se a publicação será feita na conta Vercel já usada pelo usuário ou em uma conta Vercel nova;
-9. confirmação de que o usuário ou a empresa representada tem autorização para reutilizar as imagens comerciais indicadas.
+8. URL ou nome do **repositório GitHub privado novo**, já fornecido pelo usuário para receber o projeto;
+9. referência/URL do **projeto Supabase novo e vazio**, já fornecido pelo usuário;
+10. confirmação de que o repositório e o Supabase pertencem ao novo projeto e não contêm dados de outro cliente;
+11. confirmação de que o usuário ou a empresa representada tem autorização para reutilizar as imagens comerciais indicadas.
+
+A ausência inicial de projeto na Vercel é esperada e obrigatória. Não peça conta, time, importação nem decisão de Vercel nesta etapa. A Vercel só entra no fluxo depois que o repositório e o Supabase estiverem prontos e o usuário tiver feito a importação solicitada na etapa 26.
 
 O nome só pode ser definido nessa etapa. Enquanto ele não for informado, use placeholders como `{{NOME_DO_PROJETO}}`, `{{SLUG_DO_PROJETO}}` e `{{EMAIL_ADMIN}}`. Não invente um nome e não herde a identidade do sistema-base nem do site de origem do catálogo.
 
@@ -73,15 +77,17 @@ Não implemente sincronização automática com o site de origem e não sobrescr
 
 ### 2. Infraestrutura nova e isolada para cada execução
 
-Cada aplicação criada a partir deste prompt deve ter infraestrutura independente:
+Cada aplicação criada a partir deste prompt deve ter infraestrutura independente. O cenário padrão é: o usuário fornece um **repositório GitHub privado novo**, um **projeto Supabase novo e vazio** e o **e-mail do projeto**. A IA deve:
 
-- criar e usar uma **nova conta/organização e um novo projeto Supabase** destinados ao novo sistema;
-- criar um **repositório GitHub novo e privado**;
+- validar que o repositório recebido é o destino correto e trabalhar somente nele;
+- validar que o Supabase recebido está vazio ou contém apenas estruturas autorizadas para este novo projeto;
+- criar no Supabase todas as migrações, schemas, extensões, tabelas, tipos, índices, funções, gatilhos, RLS, políticas, buckets, sementes, Auth, URLs, SMTP e modelos de e-mail necessários;
+- publicar no repositório privado todos os arquivos do projeto, migrações, templates, ativos, testes, documentação e workflow;
 - nunca reutilizar banco, projeto, URL, referência, usuário administrativo, chaves, bucket ou dados de outro cliente;
-- na Vercel, aguardar a decisão do usuário: usar a conta existente ou uma conta nova;
-- se o usuário disser que criará uma conta Vercel nova, esperar a autenticação protegida nessa conta antes de vincular e publicar;
-- se ele não solicitar conta Vercel nova, usar a conta Vercel já autenticada, criando nela um projeto novo e separado;
-- criar variáveis e integrações específicas para o novo projeto.
+- não criar, importar, vincular ou configurar projeto na Vercel antes do portão descrito na etapa 26;
+- criar variáveis e integrações específicas para o novo projeto, sem copiar valores de outro sistema.
+
+Se o repositório privado ou o Supabase novo não tiver sido fornecido, pare e peça somente o item ausente. Não escolha silenciosamente outro repositório, não crie infraestrutura paga sem confirmação de custo e não reutilize um projeto antigo para ganhar tempo.
 
 Nunca peça ao usuário que escreva login, senha, token privado, chave secreta ou código sensível na conversa. Quando uma autenticação for realmente necessária, use a sessão já autenticada ou o seletor/canal protegido oferecido pela plataforma. Não mostre nem registre credenciais em mensagens, código, commits, capturas de tela ou logs.
 
@@ -223,10 +229,12 @@ Quando a empresa atuar com manutenção:
 Gere:
 
 - SVG leve para o site, com `title`, texto alternativo e dimensões adequadas;
-- PNG otimizado para os e-mails, porque muitos clientes de e-mail removem SVG;
+- PNG RGB otimizado e exclusivo para os e-mails, com nome sem espaços nem caracteres especiais, aproximadamente 280 a 360 px no arquivo, exibido entre 120 e 180 px e preferencialmente entre 15 e 80 KB; aceite até 100 KB somente quando a identidade exigir mais detalhe;
 - alternativa textual visível caso a imagem do e-mail seja bloqueada;
 - variação que funcione em fundo claro e escuro;
 - favicon/ícone quando aplicável.
+
+A moldura visual do e-mail deve ser construída com tabelas, cores, bordas e CSS inline; não transforme a moldura em uma imagem pesada. A marca deve continuar identificável pelo nome escrito em HTML quando a logomarca for bloqueada.
 
 Para compartilhamento e instalação, gere e conecte obrigatoriamente:
 
@@ -792,7 +800,9 @@ Quando o usuário pedir o catálogo completo, percorra todas as categorias, pagi
 - rejeite arquivo que contenha texto de data URI no lugar dos bytes da imagem, ou corrija-o no script de preparação;
 - use `scripts/prepare-assets.mjs` antes do build para corrigir/validar ativos quando necessário;
 - nenhuma imagem final pode depender de host temporário que quebre depois do deploy;
-- mantenha imagem de e-mail pequena e otimizada;
+- mantenha a imagem de e-mail pequena e otimizada: PNG/JPG/GIF em RGB, alvo de 15 a 80 KB e limite operacional de 100 KB por logomarca; não reutilize automaticamente a imagem grande do cabeçalho, do catálogo ou do Open Graph;
+- publique a imagem de e-mail em URL HTTPS pública, estável e pertencente ao domínio oficial do projeto; teste HTTP 200, `Content-Type`, tamanho, dimensões e cache;
+- use molduras e ornamentos do e-mail em HTML/CSS inline, sem imagem de fundo e sem segundo arquivo decorativo pesado;
 - nunca substitua silenciosamente a foto ou o produto do usuário.
 
 ### 19. E-mails do Supabase Auth
@@ -809,7 +819,7 @@ Todos devem:
 - usar HTML de tabelas e estilos inline para máxima compatibilidade;
 - ter preheader oculto, cabeçalho com marca, título, explicação, código em tamanho grande, validade e aviso de segurança;
 - usar a imagem PNG otimizada da marca e manter o nome da empresa em texto;
-- funcionar com Gmail, Outlook, iCloud e clientes móveis;
+- funcionar com Gmail, Outlook/Hotmail, Yahoo Mail, iCloud/Apple Mail e clientes móveis;
 - conter o token `{{ .Token }}` em uma caixa visual grande e legível;
 - não conter `{{ .ConfirmationURL }}`, botão, link clicável ou `localhost`;
 - informar que ninguém da loja solicitará o código;
@@ -817,15 +827,21 @@ Todos devem:
 - ser coerentes com a identidade visual escolhida;
 - comunicar os serviços Android/iPhone/iOS apenas quando isso for verdadeiro para a empresa;
 - continuar compreensíveis se o cliente de e-mail bloquear imagens: nome da empresa, finalidade e código devem existir como texto HTML;
-- usar no máximo uma logomarca externa pequena e otimizada, servida por HTTPS público estável, com dimensões declaradas e `alt` correto;
-- evitar SVG, Base64, JavaScript, fontes remotas obrigatórias, vídeo, formulário e CSS externo;
-- ter largura máxima aproximada de 600 px, HTML com tabelas e CSS inline para não travar nem deformar a caixa de entrada.
+- usar no máximo uma logomarca externa pequena e otimizada, servida por HTTPS público estável, com `width`, `height`, `alt`, `display:block` e tamanho de exibição declarados;
+- usar PNG, JPG ou GIF em RGB no e-mail; não usar WebP ou SVG como única versão, porque o suporte varia entre clientes e versões do Outlook;
+- evitar Base64/data URI, anexo CID desnecessário, JavaScript, fontes remotas obrigatórias, vídeo, formulário, iframe, CSS externo, rastreador e imagem de fundo;
+- ter largura máxima aproximada de 600 px, HTML com tabelas e CSS inline para não travar nem deformar a caixa de entrada;
+- manter o HTML enxuto, preferencialmente abaixo de 100 KB, com somente uma imagem de marca; somando as imagens do modelo, manter o alvo abaixo de 150 KB;
+- não prometer que imagens externas sempre aparecerão: Outlook e outros clientes podem bloqueá-las por decisão do usuário ou do administrador. O aceite exige um e-mail completo e bonito também sem a imagem, com moldura, nome, título, instrução e código feitos em HTML;
+- criar e versionar arquivos separados para cadastro, acesso/OTP e recuperação, e publicar no painel do Supabase exatamente o mesmo conteúdo versionado.
 
 Assuntos obrigatórios, adaptando apenas o nome da marca:
 
-- `Seu código de cadastro — {{NOME_DO_PROJETO}}`;
+- `Confirme seu cadastro — {{NOME_DO_PROJETO}}`;
 - `Seu código de acesso — {{NOME_DO_PROJETO}}`;
-- `Seu código para redefinir a senha — {{NOME_DO_PROJETO}}`.
+- `Redefina sua senha — {{NOME_DO_PROJETO}}`.
+
+Antes de salvar, visualize os três modelos no modo Source e Preview. Depois de salvar, recarregue cada página separadamente e comprove que assunto e HTML persistiram. Se um aviso, chat, banner promocional ou painel flutuante cobrir o botão de salvar, feche o elemento que cobre o controle e repita a ação somente depois de confirmar o bloqueio visual.
 
 #### 19.1 OTP de exatamente 6 dígitos — configuração e código
 
@@ -873,7 +889,11 @@ Se o usuário escolher Gmail/Google Workspace:
 - remover espaços da senha de app somente na hora de preencher o campo protegido;
 - confirmar que o remetente e o usuário pertencem à mesma conta autorizada.
 
-Para volume comercial, recomende e aceite provedor transacional com domínio autenticado, SPF, DKIM e DMARC. Gmail pode servir para baixo volume, mas o teste real de entrega continua obrigatório.
+Para volume comercial, recomende e aceite provedor transacional compatível com SMTP, como Amazon SES, Resend, Postmark, Mailgun, SendGrid ou Brevo, conforme disponibilidade, preço, região e volume atuais. Não trate Outlook/Hotmail, Yahoo, iCloud ou Gmail apenas como “outros SMTPs”: eles também são caixas receptoras importantes e todos devem participar dos testes de compatibilidade quando houver endereços autorizados.
+
+Para domínio próprio, configure e valide SPF, DKIM e DMARC com alinhamento do domínio remetente; mantenha baixa a taxa de reclamação, monitore bounces e não faça disparo de marketing pelo fluxo de autenticação. Gmail pode servir para baixo volume transacional, mas não é garantia de entrega. A escolha do provedor não elimina o teste real em Gmail, Outlook/Hotmail, Yahoo e iCloud/Apple Mail.
+
+Nunca invente credenciais nem peça senha SMTP em mensagem comum. Use somente o canal protegido da plataforma e confirme a configuração sem exibir o segredo. Em projetos novos do plano Free, o SMTP personalizado deve estar ativo antes de salvar os templates personalizados.
 
 #### 19.3 URL oficial e bloqueio de `localhost`
 
@@ -1047,6 +1067,11 @@ Crie testes que leiam o código, templates e migrações e comprovem pelo menos:
 20. a ação de `active = false` é apresentada como `Despublicar`, pede confirmação, trata erro e preserva o registro;
 21. nenhum arquivo de produção, template, metadata ou variável versionada contém `localhost` ou `127.0.0.1` como URL oficial;
 22. nenhum segredo SMTP, senha de app, PIN puro, `service_role` ou segredo compartilhado aparece no repositório.
+23. cada template usa a PNG de e-mail do próprio projeto por HTTPS, com dimensões e `alt`, e a imagem fica dentro do limite operacional de 100 KB;
+24. os três templates continuam contendo marca em texto, título, instrução, código e moldura quando a tag `<img>` é removida ou bloqueada;
+25. nenhum template usa WebP/SVG como única imagem, Base64/data URI, imagem de fundo, JavaScript, CSS externo, fonte remota obrigatória ou segundo arquivo decorativo pesado;
+26. o repositório privado e o Supabase fornecidos são os destinos efetivamente usados e o Supabase recebeu as estruturas previstas a partir do estado vazio;
+27. nenhuma configuração de Vercel é executada antes do marcador de prontidão e da confirmação de importação pelo usuário.
 
 Execute, no mínimo:
 
@@ -1086,7 +1111,7 @@ Faça testes com e-mail real autorizado pelo usuário. Verifique cadastro, admin
 
 ### 25. GitHub
 
-- crie repositório novo e privado com o slug escolhido;
+- use exclusivamente o repositório novo e privado fornecido pelo usuário; se ele ainda não existir, solicite que seja fornecido ou obtenha autorização específica para criá-lo;
 - use branch padrão `main`;
 - adicione arquivos do projeto, migrações, templates, ativos, testes, documentação e workflow;
 - mantenha o prompt mestre em suas cópias previstas e atualize, em arquivos separados, o manual operacional e o dossiê de continuidade com data, evidências, último commit, ponto de parada e pendências reais;
@@ -1098,29 +1123,42 @@ Faça testes com e-mail real autorizado pelo usuário. Verifique cadastro, admin
 
 ### 26. Vercel
 
-Só decida a conta no momento da execução:
+A Vercel é obrigatoriamente a **segunda fase**. No início da execução, assuma que o projeto ainda não foi importado e não tente criá-lo, vinculá-lo ou configurá-lo.
 
-- opção A: criar o projeto na conta Vercel já autenticada;
-- opção B: o usuário informa que usará uma conta Vercel nova, autentica-se pelo canal protegido e a IA cria o projeto nessa conta.
+#### Fase A — antes da Vercel
 
-Em ambos os casos:
+1. concluir código, ativos, migrações, tabelas, RLS, Storage, Auth, SMTP, templates e testes possíveis;
+2. publicar todos os arquivos no repositório GitHub privado fornecido;
+3. aplicar e verificar toda a estrutura no Supabase novo e vazio;
+4. confirmar que o repositório contém o projeto completo e que o Supabase está pronto;
+5. avisar objetivamente ao usuário: **“GitHub e Supabase estão prontos. Agora importe este repositório privado na Vercel e me avise quando a importação terminar.”**;
+6. parar as ações na Vercel e aguardar a confirmação do usuário.
 
-- crie um projeto Vercel novo;
-- conecte-o ao repositório GitHub novo;
-- configure as variáveis corretas do novo Supabase;
-- publique produção;
-- confira domínio, HTTPS e build;
-- confirme no HTML publicado as metatags sociais, o manifesto e os ícones e teste os respectivos arquivos com HTTP 200;
-- configure URL oficial no Supabase Auth;
-- não reutilize variáveis de outro site.
+Esse aviso é um portão real, não uma simples recomendação. Não crie um projeto Vercel por API/CLI, não importe o repositório em nome do usuário e não suponha que a integração já existe.
+
+#### Fase B — depois da importação confirmada pelo usuário
+
+Somente depois que o usuário confirmar que importou o repositório na conta/time corretos, a IA está autorizada a:
+
+- localizar o novo projeto Vercel resultante da importação;
+- confirmar que ele aponta para o repositório e branch `main` corretos;
+- configurar as variáveis corretas do novo Supabase em Production, Preview e Development somente quando aplicável;
+- definir a URL canônica e executar/reimplantar a produção;
+- conferir domínio, HTTPS, build e logs;
+- voltar ao Supabase e substituir a Site URL/Redirect URLs provisórias pelo domínio oficial da Vercel, sem `localhost`;
+- confirmar no HTML publicado as metatags sociais, o manifesto e os ícones e testar os respectivos arquivos com HTTP 200;
+- testar cadastro, acesso administrativo e recuperação usando a produção;
+- não reutilizar variáveis, domínio, projeto ou integração de outro site.
+
+Se a importação ainda não existir, encerre a Fase A com o aviso acima; não marque o projeto como totalmente publicado e não invente URL da Vercel.
 
 ### 27. Ordem obrigatória de execução
 
 Siga esta ordem para reduzir erros:
 
-1. coletar nome, identidade, contatos, link e autorização do catálogo, admin e decisão futura da Vercel;
+1. coletar nome, identidade, contatos, link e autorização do catálogo, e-mail do projeto, repositório GitHub privado e Supabase novo/vazio;
 2. criar diretório e código local;
-3. criar conta/organização e projeto Supabase novos;
+3. conectar ao projeto Supabase novo fornecido e comprovar o estado inicial;
 4. gerar e aplicar migrações completas;
 5. validar as 25 tabelas, RLS, funções, bucket e sementes;
 6. configurar Auth, `Email OTP length = 6`, SMTP, Site URL oficial, Redirect URLs e os três templates;
@@ -1129,13 +1167,15 @@ Siga esta ordem para reduzir erros:
 9. criar o robô diário e seus testes;
 10. rodar testes, tipos e build;
 11. testar recebimento e conclusão dos três fluxos com códigos reais de exatamente 6 dígitos;
-12. criar repositório GitHub privado novo e publicar o commit;
-13. decidir com o usuário a conta Vercel e publicar;
-14. testar todo o fluxo em produção;
-15. confirmar a primeira execução real do keepalive;
-16. validar banner social, favoritos e instalação na tela inicial;
-17. atualizar prompt mestre, manual e dossiê;
-18. entregar relatório final.
+12. publicar o commit no repositório GitHub privado fornecido e confirmar branch/commit;
+13. confirmar que GitHub e Supabase estão prontos, enviar a frase obrigatória da Fase A e parar;
+14. aguardar o usuário importar o repositório na Vercel e confirmar a conclusão;
+15. somente então localizar/configurar o projeto Vercel importado, variáveis, domínio e produção;
+16. atualizar Site URL e Redirect URLs no Supabase com a URL oficial e testar todo o fluxo em produção;
+17. confirmar a primeira execução real do keepalive;
+18. validar banner social, favoritos e instalação na tela inicial;
+19. atualizar prompt mestre, manual e dossiê;
+20. entregar relatório final.
 
 ### 28. Critérios de aceite
 
@@ -1143,14 +1183,16 @@ O trabalho só está concluído quando:
 
 - o nome foi escolhido pelo usuário e aplicado sem vestígios do projeto anterior;
 - a logomarca e a identidade são novas e não pertencem ao sistema-base nem ao site de origem do catálogo;
-- Supabase e GitHub são novos e independentes;
-- a conta Vercel usada corresponde à decisão explícita do usuário;
+- Supabase e GitHub fornecidos são novos, independentes e pertencem ao projeto correto;
+- o Supabase inicialmente vazio recebeu todas as tabelas, funções, RLS, políticas, buckets, Auth, SMTP e modelos necessários;
+- nenhuma ação na Vercel ocorreu antes do aviso de prontidão, da importação feita pelo usuário e da confirmação posterior;
+- depois do portão, a conta/time e o projeto Vercel usados correspondem à importação confirmada pelo usuário;
 - as 25 tabelas, 25 RLS, políticas, funções, gatilhos, índices e bucket existem;
 - catálogo e imagens abrem em produção;
 - a quantidade, as associações imagem/produto e os preços coincidem com a fotografia inicial registrada;
 - alterações feitas no painel permanecem intactas e não são substituídas por sincronização externa;
 - cadastro, login, recuperação e admin funcionam;
-- todos os códigos têm 6 dígitos e chegam em e-mails personalizados;
+- todos os códigos têm 6 dígitos e chegam em e-mails personalizados, com logomarca PNG leve, moldura HTML/CSS e conteúdo legível quando imagens são bloqueadas;
 - nenhum e-mail envia link de autenticação ou `localhost`;
 - `Email OTP length` está salvo como 6 no provedor do Supabase, e não apenas escrito na interface;
 - SMTP personalizado está salvo e os três recebimentos foram comprovados em caixas reais;
@@ -1189,6 +1231,9 @@ O trabalho só está concluído quando:
 - não manter `hotlink` das imagens nem sincronização automática de preços sem ordem expressa;
 - não sobrescrever alterações feitas no painel com dados de uma importação anterior;
 - não decidir sozinho a conta Vercel;
+- não criar, importar, vincular, configurar ou publicar projeto Vercel antes de GitHub e Supabase estarem prontos e o usuário confirmar a importação;
+- não usar WebP, SVG, Base64/data URI ou imagem grande como única logomarca de e-mail;
+- não criar a moldura do e-mail como uma imagem pesada nem depender da imagem para exibir nome, finalidade, instrução ou código;
 - não depender de imagens externas frágeis;
 - não chamar Android/iPhone de propriedade ou afiliação da empresa;
 - não confundir contato pelo WhatsApp com pagamento ou compra finalizada.
@@ -1200,14 +1245,14 @@ O trabalho só está concluído quando:
 Ao terminar, informe de maneira objetiva:
 
 - nome e slug escolhidos;
-- URL pública;
+- URL pública, somente quando a Fase B da Vercel tiver sido concluída;
 - repositório GitHub e commit final;
 - projeto Supabase novo usado, sem exibir chaves;
-- conta Vercel escolhida conforme decisão do usuário;
+- confirmação de que o usuário importou o repositório e identificação da conta/time Vercel usada depois do portão;
 - quantidade de tabelas, políticas, produtos e imagens;
 - link de origem, horário da fotografia inicial, contagem importada e resultado da comparação de imagens e preços;
 - resultados de teste, tipos e build;
-- resultado dos três e-mails reais;
+- resultado dos três e-mails reais, incluindo peso/formato da logomarca, URL HTTPS, visual com imagens habilitadas e legibilidade com imagens bloqueadas;
 - evidência de que o provedor Supabase está com OTP de 6 dígitos e URLs oficiais sem `localhost`;
 - resultado do login administrativo;
 - resultado da criação, edição/salvamento, despublicação e republicação de um produto em celular;
